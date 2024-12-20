@@ -247,6 +247,9 @@ abstract type AbstractAnnotater end
 abstract type AbstractAnnotatedNode end
 abstract type AbstractAnnotationStyler end
 
+# ## Document Term Matrix
+abstract type AbstractDocumentTermMatrix end
+
 ############################
 ### FUNCTIONS
 ############################

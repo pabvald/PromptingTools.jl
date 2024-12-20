@@ -1,16 +1,17 @@
 using Test
-using SparseArrays, LinearAlgebra, Unicode, Random
-using PromptingTools.Experimental.RAGTools
+using HTTP, JSON3
+using LinearAlgebra, Random, SparseArrays, Unicode
 using PromptingTools
 using PromptingTools.AbstractTrees
+using PromptingTools.Experimental.RAGTools
+using Snowball
+
 const PT = PromptingTools
 const RT = PromptingTools.Experimental.RAGTools
-using Snowball
-using JSON3, HTTP
 
 @testset "RAGTools" begin
     include("utils.jl")
-    include("types.jl")
+    include("types/Types.jl")
     include("preparation.jl")
     include("rank_gpt.jl")
     include("retrieval.jl")

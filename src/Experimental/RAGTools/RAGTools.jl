@@ -9,15 +9,26 @@ This module is experimental and may change at any time. It is intended to be mov
 """
 module RAGTools
 
-using PromptingTools
-using PromptingTools: pprint, AbstractMessage
-using HTTP, JSON3
-using JSON3: StructTypes
+# External Dependencies
+# ====================
 using AbstractTrees
 using AbstractTrees: PreOrderDFS
-const PT = PromptingTools
+using HTTP
+using JSON3
+using JSON3: StructTypes
+using Pinecone: Pinecone, PineconeContextv3, PineconeIndexv3, init_v3, Index, PineconeVector, upsert
+using PromptingTools
+using PromptingTools: pprint, AbstractMessage
 using PromptingTools.Experimental.APITools: create_websearch
+using UUIDs: UUIDs, uuid4
 
+# Constants
+# =========
+const PT = PromptingTools
+
+# Include Files 
+# ==============
+include("utils.jl")
 # reexport
 export pprint
 
@@ -25,35 +36,34 @@ export pprint
 ## export STOPWORDS, tokenize, split_into_code_and_sentences
 # export merge_kwargs_nested
 export getpropertynested, setpropertynested
-include("utils.jl")
 
 # eg, cohere_api
 include("api_services.jl")
 
 include("rag_interface.jl")
 
+include("types/Types.jl")
 export ChunkIndex, ChunkKeywordsIndex, ChunkEmbeddingsIndex, PineconeIndex, CandidateChunks, CandidateWithChunks, RAGResult
 export MultiIndex, SubChunkIndex, MultiCandidateChunks
-include("types.jl")
 
+include("preparation.jl")
 export build_index, get_chunks, get_embeddings, get_keywords, get_tags, SimpleIndexer,
        KeywordsIndexer, PineconeIndexer
-include("preparation.jl")
 
 include("rank_gpt.jl")
 
+include("retrieval.jl")
 export retrieve, SimpleRetriever, SimpleBM25Retriever, AdvancedRetriever
 export find_closest, find_tags, rerank, rephrase
-include("retrieval.jl")
 
+include("generation.jl")
 export airag, build_context!, generate!, refine!, answer!, postprocess!
 export SimpleGenerator, AdvancedGenerator, RAGConfig
-include("generation.jl")
 
-export annotate_support, TrigramAnnotater, print_html
 include("annotation.jl")
+export annotate_support, TrigramAnnotater, print_html
 
-export build_qa_evals, run_qa_evals
 include("evaluation.jl")
+export build_qa_evals, run_qa_evals
 
 end

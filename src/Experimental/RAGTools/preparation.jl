@@ -714,9 +714,7 @@ function build_index(
     return index
 end
 
-# TODO: where to put these?
-using Pinecone: Pinecone, PineconeContextv3, PineconeIndexv3, init_v3, Index, PineconeVector, upsert
-using UUIDs: UUIDs, uuid4
+
 """
     build_index(
         indexer::PineconeIndexer, files_or_docs::Vector{<:AbstractString};

@@ -8,6 +8,8 @@ using PromptingTools.Experimental.RAGTools
 using PromptingTools.Experimental.RAGTools: tf, vocab, vocab_lookup, idf, doc_rel_length
 const RT = PromptingTools.Experimental.RAGTools
 
+using Pinecone: Pinecone, PineconeContextv3, PineconeIndexv3, init_v3, Index, PineconeVector, upsert
+
 # forward to LinearAlgebra.normalize
 RT._normalize(arr::AbstractArray) = LinearAlgebra.normalize(arr)
 
