@@ -441,6 +441,96 @@ struct AnthropicSchema <: AbstractAnthropicSchema end
     inputs::Any = nothing
 end
 
+abstract type AbstractLangdockSchema <: AbstractPromptSchema end
+
+"""
+    LangdockSchema <: AbstractLangdockSchema
+
+LangdockSchema is designed to work with Langdock's Agent API. Langdock is an enterprise AI platform
+that provides a unified API for accessing various AI models with features like GDPR compliance,
+knowledge folders, and custom agents.
+
+The schema calls the Langdock Assistant API endpoint at `https://api.langdock.com/assistant/v1/chat/completions`.
+
+# Authentication
+Requires the `LANGDOCK_API_KEY` environment variable to be set with your Langdock API key.
+
+# Usage
+You can use Langdock agents by providing either:
+- `assistant_id`: ID of an existing Langdock agent (extracted from the agent URL)
+- `assistant`: A temporary agent configuration (see `api_kwargs`)
+
+# Example
+
+Using a Langdock agent by ID:
+```julia
+# Set your API key
+ENV["LANGDOCK_API_KEY"] = "your-api-key"
+
+# Use with an existing agent ID
+msg = aigenerate("What is the weather?"; model="langdock",
+    api_kwargs=(; assistant_id="your-agent-id"))
+```
+
+Using a temporary agent configuration:
+```julia
+msg = aigenerate("Summarize this text"; model="langdock",
+    api_kwargs=(; assistant=Dict(
+        :name => "Summarizer",
+        :instructions => "You are a helpful summarization assistant.",
+        :model => "gpt-4o"
+    )))
+```
+
+See Langdock's API documentation for more details: https://docs.langdock.com/api-endpoints/agent/agent
+"""
+struct LangdockSchema <: AbstractLangdockSchema end
+
+"Echoes the user's input back to them. Used for testing the implementation"
+@kwdef mutable struct TestEchoLangdockSchema <: AbstractLangdockSchema
+    response::AbstractDict = Dict{Symbol, Any}(
+        :result => [Dict{Symbol, Any}(
+            :id => "test-id",
+            :role => "assistant",
+            :content => [Dict{Symbol, Any}(:type => "text", :text => "Test response")]
+        )]
+    )
+    status::Integer = 200
+    model_id::String = ""
+    inputs::Any = nothing
+end
+
+"""
+    LangdockOpenAISchema <: AbstractOpenAISchema
+
+Schema for Langdock's OpenAI-compatible API endpoints. Use this for:
+- Embeddings: `aiembed("text"; model="langdock-emb")`
+- Chat completions: For direct model access without agents
+
+The schema routes requests to Langdock's OpenAI-compatible API at:
+- Embeddings: `https://api.langdock.com/openai/{region}/v1/embeddings`
+- Chat: `https://api.langdock.com/openai/{region}/v1/chat/completions`
+
+# Authentication
+Requires the `LANGDOCK_API_KEY` environment variable to be set.
+
+# Region
+By default uses "eu" region. Override via `api_kwargs=(; region="us")`.
+
+# Example
+
+```julia
+# Embeddings
+result = aiembed("Hello world"; model="langdock-emb")
+
+# Or with explicit schema
+result = aiembed(PT.LangdockOpenAISchema(), "Hello world"; model="text-embedding-ada-002")
+```
+
+See: https://docs.langdock.com/api-endpoints/embedding/openai-embedding
+"""
+struct LangdockOpenAISchema <: AbstractOpenAISchema end
+
 abstract type AbstractShareGPTSchema <: AbstractPromptSchema end
 
 """

@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
+## [0.92.0]
+
+### Added
+- Added Langdock integration for enterprise AI with GDPR compliance. Two schemas available:
+  - `LangdockSchema` (alias `langdock`, `ldock`) for Langdock Agent API with knowledge folders and custom agents. Requires `assistant_id` or `assistant` configuration in `api_kwargs`.
+  - `LangdockOpenAISchema` (alias `langdock-emb`, `ldockemb`) for OpenAI-compatible embeddings endpoint.
+- Added `LANGDOCK_API_KEY` environment variable support for authentication.
+
 ## [0.91.0]
 
 ### Added

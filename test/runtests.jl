@@ -35,6 +35,7 @@ end
     include("llm_google.jl")
     include("llm_openai_schema_def.jl")
     include("llm_anthropic.jl")
+    include("llm_langdock.jl")
     include("llm_sharegpt.jl")
     include("llm_tracer.jl")
     include("macros.jl")

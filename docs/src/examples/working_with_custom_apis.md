@@ -160,3 +160,107 @@ For embedding a text, use `aiembed`:
 aiembed(PT.FireworksOpenAISchema(), "embed me"; model="nomic-ai/nomic-embed-text-v1.5")
 ```
 Note: You can register the model with `PT.register_model!` and use it as usual.
+
+## Using Langdock
+
+[Langdock](https://langdock.com/) is an enterprise AI platform that provides a unified API for accessing various AI models with features like GDPR compliance, knowledge folders, and custom agents.
+
+PromptingTools.jl supports two Langdock APIs:
+1. **Agent API** (`LangdockSchema`) - For using Langdock agents with knowledge bases and custom configurations
+2. **OpenAI-compatible API** (`LangdockOpenAISchema`) - For embeddings and direct model access
+
+### Setup
+
+Set your API key via environment variable:
+```julia
+ENV["LANGDOCK_API_KEY"] = "your-api-key"
+```
+
+### Using Langdock Agents
+
+Use `LangdockSchema` (alias: "langdock" or "ldock") to interact with Langdock agents:
+
+```julia
+# Using an existing agent by ID
+msg = aigenerate("What are our company policies?";
+    model = "langdock",
+    api_kwargs = (; assistant_id = "your-agent-id"))
+
+# Using a temporary agent with custom configuration
+msg = aigenerate("Summarize this document";
+    model = "langdock",
+    api_kwargs = (;
+        assistant = Dict(
+            :name => "Summarizer",
+            :instructions => "You are a helpful assistant that creates concise summaries.",
+            :model => "gpt-4o",
+            :temperature => 0.3
+        )
+    ))
+```
+
+You can find the agent ID from the URL when viewing your agent in Langdock's interface.
+
+### Using Embeddings
+
+Use `LangdockOpenAISchema` (alias: "langdock-emb" or "ldockemb") for embeddings:
+
+```julia
+# Using the registered model alias
+result = aiembed("Hello world"; model = "langdock-emb")
+
+# Or with explicit schema
+result = aiembed(PT.LangdockOpenAISchema(), "Hello world"; model = "text-embedding-ada-002")
+```
+
+### Region Selection
+
+By default, Langdock uses the "eu" region. To use the US region, pass it via `api_kwargs`:
+
+```julia
+# For Agent API
+msg = aigenerate("Hello";
+    model = "langdock",
+    api_kwargs = (; assistant_id = "id", region = "us"))
+
+# For embeddings (via keyword argument)
+result = aiembed(PT.LangdockOpenAISchema(), "Hello";
+    model = "text-embedding-ada-002",
+    region = "us")
+```
+
+### Structured Output
+
+Langdock agents support structured output via the `output` parameter:
+
+```julia
+# Object output
+msg = aigenerate("Extract the person's details";
+    model = "langdock",
+    api_kwargs = (;
+        assistant_id = "your-agent-id",
+        output = Dict(
+            :type => "object",
+            :schema => Dict(
+                :type => "object",
+                :properties => Dict(
+                    :name => Dict(:type => "string"),
+                    :age => Dict(:type => "integer")
+                )
+            )
+        )
+    ))
+
+# Enum output
+msg = aigenerate("Classify the sentiment";
+    model = "langdock",
+    api_kwargs = (;
+        assistant_id = "your-agent-id",
+        output = Dict(
+            :type => "enum",
+            :enum => ["positive", "negative", "neutral"]
+        )
+    ))
+```
+
+Find more information in [Langdock's documentation](https://docs.langdock.com/).

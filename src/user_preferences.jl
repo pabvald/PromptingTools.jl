@@ -29,6 +29,7 @@ Check your preferences by calling `get_preferences(key::String)`.
 - `XAI_API_KEY`: The API key for the XAI API. Get your key from [here](https://console.x.ai/).
 - `MOONSHOT_API_KEY`: The API key for the Moonshot API. Get your key from [here](https://platform.moonshot.ai/).
 - `MINIMAX_API_KEY`: The API key for the MiniMax API. Get your key from [here](https://intl.minimaxi.com/document/platform%20introduction).
+- `LANGDOCK_API_KEY`: The API key for the Langdock Agent API. Get yours from your Langdock workspace settings. See [Langdock's documentation](https://docs.langdock.com/) for more information.
 - `MODEL_CHAT`: The default model to use for aigenerate and most ai* calls. See `MODEL_REGISTRY` for a list of available models or define your own.
 - `MODEL_EMBEDDING`: The default model to use for aiembed (embedding documents). See `MODEL_REGISTRY` for a list of available models or define your own.
 - `PROMPT_SCHEMA`: The default prompt schema to use for aigenerate and most ai* calls (if not specified in `MODEL_REGISTRY`). Set as a string, eg, `"OpenAISchema"`.
@@ -66,6 +67,7 @@ Define your `register_model!()` calls in your `startup.jl` file to make them ava
 - `XAI_API_KEY`: The API key for the XAI API. Get your key from [here](https://console.x.ai/).
 - `MOONSHOT_API_KEY`: The API key for the Moonshot API. Get your key from [here](https://platform.moonshot.cn/).
 - `MINIMAX_API_KEY`: The API key for the MiniMax API. Get your key from [here](https://intl.minimaxi.com/document/platform%20introduction).
+- `LANGDOCK_API_KEY`: The API key for the Langdock Agent API. Get yours from your Langdock workspace settings.
 
 Preferences.jl takes priority over ENV variables, so if you set a preference, it will take precedence over the ENV variable.
 
@@ -93,6 +95,7 @@ const ALLOWED_PREFERENCES = ["MISTRAL_API_KEY",
     "XAI_API_KEY",
     "MOONSHOT_API_KEY",  # Added XAI_API_KEY
     "MINIMAX_API_KEY",
+    "LANGDOCK_API_KEY",
     "MODEL_CHAT",
     "MODEL_EMBEDDING",
     "MODEL_ALIASES",
@@ -181,6 +184,7 @@ global LOG_DIR::String = ""
 global XAI_API_KEY::String = ""
 global MOONSHOT_API_KEY::String = ""
 global MINIMAX_API_KEY::String = ""
+global LANGDOCK_API_KEY::String = ""
 
 # Load them on init
 "Loads API keys from environment variables and preferences"
@@ -258,6 +262,9 @@ function load_api_keys!()
     global MINIMAX_API_KEY
     MINIMAX_API_KEY = @load_preference("MINIMAX_API_KEY",
         default=get(ENV, "MINIMAX_API_KEY", ""))
+    global LANGDOCK_API_KEY
+    LANGDOCK_API_KEY = @load_preference("LANGDOCK_API_KEY",
+        default=get(ENV, "LANGDOCK_API_KEY", ""))
 
     return nothing
 end
@@ -556,7 +563,10 @@ aliases = merge(
         ## Grok Code Fast
         "grokcode" => "grok-code-fast-1",
         "grokfast" => "grok-code-fast-1",
-        "gcf1" => "grok-code-fast-1"
+        "gcf1" => "grok-code-fast-1",
+        ## Langdock Agent
+        "ldock" => "langdock",
+        "ldockemb" => "langdock-emb"
     ),
     ## Load aliases from preferences as well
     @load_preference("MODEL_ALIASES", default=Dict{String, String}()))
@@ -1580,7 +1590,19 @@ registry = Dict{String, ModelSpec}(
         MoonshotOpenAISchema(),
         0.6e-6,
         2.5e-6,
-        "Moonshot's Kimi K2 model with advanced reasoning capabilities and long context support (131K tokens).")
+        "Moonshot's Kimi K2 model with advanced reasoning capabilities and long context support (131K tokens)."),
+    ## Langdock Agent
+    "langdock" => ModelSpec("langdock",
+        LangdockSchema(),
+        0.0,
+        0.0,
+        "Langdock Agent API. Pricing varies by underlying model configured in the agent. Requires `assistant_id` or `assistant` configuration in api_kwargs. See https://docs.langdock.com/"),
+    ## Langdock OpenAI-compatible (for embeddings)
+    "langdock-emb" => ModelSpec("langdock-emb",
+        LangdockOpenAISchema(),
+        0.0,
+        0.0,
+        "Langdock OpenAI-compatible API for embeddings. Use with aiembed(). Currently supports text-embedding-ada-002. See https://docs.langdock.com/api-endpoints/embedding/openai-embedding")
 )
 
 """

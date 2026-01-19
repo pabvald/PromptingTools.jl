@@ -236,6 +236,23 @@ function OpenAI.create_chat(schema::MiniMaxOpenAISchema,
     OpenAI.create_chat(CustomOpenAISchema(), api_key, model, conversation; url, kwargs...)
 end
 
+"""
+    OpenAI.create_chat(schema::LangdockOpenAISchema, ...)
+
+Dispatch to Langdock's OpenAI-compatible chat completions API.
+Default region is "eu", override via `api_kwargs=(; region="us")`.
+"""
+function OpenAI.create_chat(schema::LangdockOpenAISchema,
+        api_key::AbstractString,
+        model::AbstractString,
+        conversation;
+        region::String = "eu",
+        url::String = "https://api.langdock.com/openai/$region/v1",
+        kwargs...)
+    api_key = !isempty(api_key) ? api_key : LANGDOCK_API_KEY
+    OpenAI.create_chat(CustomOpenAISchema(), api_key, model, conversation; url, kwargs...)
+end
+
 # Add GoogleProvider implementation
 Base.@kwdef struct GoogleProvider <: AbstractCustomProvider
     api_key::String = ""
@@ -434,6 +451,24 @@ function OpenAI.create_embeddings(schema::XAIOpenAISchema,
         kwargs...)
     provider = CustomProvider(;
         api_key = !isempty(api_key) ? api_key : XAI_API_KEY,
+        base_url = url)
+    OpenAI.create_embeddings(provider, docs, model; kwargs...)
+end
+"""
+    OpenAI.create_embeddings(schema::LangdockOpenAISchema, ...)
+
+Dispatch to Langdock's OpenAI-compatible embeddings API.
+Default region is "eu", override via the `region` keyword argument.
+"""
+function OpenAI.create_embeddings(schema::LangdockOpenAISchema,
+        api_key::AbstractString,
+        docs,
+        model::AbstractString;
+        region::String = "eu",
+        url::String = "https://api.langdock.com/openai/$region/v1",
+        kwargs...)
+    provider = CustomProvider(;
+        api_key = !isempty(api_key) ? api_key : LANGDOCK_API_KEY,
         base_url = url)
     OpenAI.create_embeddings(provider, docs, model; kwargs...)
 end
